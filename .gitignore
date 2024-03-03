@@ -163,5 +163,7 @@ cython_debug/
 .env
 .env.official
 
+pyproject.toml
+
 # wms images
 airparif*.png
