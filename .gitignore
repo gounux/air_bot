@@ -163,7 +163,7 @@ cython_debug/
 .env
 .env.official
 
-pyproject.toml
+poetry.lock
 
 # wms images
 airparif*.png
