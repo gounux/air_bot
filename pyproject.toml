@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "air-bot"
+version = "0.1.0"
+description = "Air quality bot, posts map predictions on mapstodon.space"
+authors = ["guilhemallaman <contact@guilhemallaman.net>"]
+license = "GPL-2"
+readme = "README.md"
+packages = [{include = "air_bot"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.31.0"
+mastodon-py = "^1.8.1"
+colorlog = "^6.8.2"
+
+[tool.poetry.scripts]
+airparif = "air_bot.airparif:airparif"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
