@@ -76,6 +76,13 @@ class AirParifBot(AirBot):
             raise AirParifException(f"Unknown action: {arguments.action}")
 
     def _check_http_response(self, r: Response, expected: int = 200) -> None:
+        """
+        Utilitary method that checks if an HTTP response has expected status.
+        If not, an AirParifException is raised
+        :param r: HTTP response
+        :param expected: expected status_code
+        :return: nothing but a ginseng
+        """
         if r.status_code != expected:
             logger.error(r.reason)
             raise AirParifException(f"The response {r} does not have expected status")
@@ -120,18 +127,21 @@ class AirParifBot(AirBot):
         img_path, dt = self._generate_map_image_now()
         if dryrun:
             return
-        self.mastodon.status_post(
-            "💨 Carte de la qualité de l'air mesurée par #AirParif en ce moment",
-            media_ids=[
-                self.mastodon.media_post(
-                    img_path,
-                    mime_type=MIME_PNG,
-                    description=f"Carte de la qualité de l'air mesurée par AirParif à {dt.strftime('%Hh%M')}",
-                )
-            ],
-            visibility="unlisted",
-            language="fr",
-        )
+        try:
+            self.mastodon.status_post(
+                "💨 Carte de la qualité de l'air mesurée par #AirParif en ce moment",
+                media_ids=[
+                    self.mastodon.media_post(
+                        img_path,
+                        mime_type=MIME_PNG,
+                        description=f"Carte de la qualité de l'air mesurée par AirParif à {dt.strftime('%Hh%M')}",
+                    )
+                ],
+                visibility="unlisted",
+                language="fr",
+            )
+        finally:
+            os.remove(img_path)
 
     def _bulletin(self, day: str, day_key: str) -> str:
         """
@@ -170,18 +180,21 @@ class AirParifBot(AirBot):
         img_path, dt = self._generate_map_image_now()
         if dryrun:
             return
-        self.mastodon.status_post(
-            toot,
-            media_ids=[
-                self.mastodon.media_post(
-                    img_path,
-                    mime_type=MIME_PNG,
-                    description=f"Carte de la qualité de l'air mesurée par AirParif à {dt.strftime('%Hh%M')}",
-                )
-            ],
-            visibility="unlisted",
-            language="fr",
-        )
+        try:
+            self.mastodon.status_post(
+                toot,
+                media_ids=[
+                    self.mastodon.media_post(
+                        img_path,
+                        mime_type=MIME_PNG,
+                        description=f"Carte de la qualité de l'air mesurée par AirParif à {dt.strftime('%Hh%M')}",
+                    )
+                ],
+                visibility="unlisted",
+                language="fr",
+            )
+        finally:
+            os.remove(img_path)
 
     def _tomorrow(self, dryrun: bool) -> None:
         toot = self._bulletin("demain", "demain")
