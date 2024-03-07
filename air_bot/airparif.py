@@ -22,6 +22,13 @@ TOOT_BULLETIN_TEMPLATE = """💨 Bulletin #AirParif {day} ({date}) :
 Concentrations des polluants:
 {pollutants}"""
 
+TOOT_EPISODE_TEMPLATE = """💨 #AirParif épisode de pollution demain :
+
+\"{message}\"
+
+Concentrations des polluants:
+{pollutants}"""
+
 
 class AirParifBot(AirBot):
     api_key: str
@@ -216,11 +223,25 @@ class AirParifBot(AirBot):
         data = r.json()
         if not data["actif"]:
             raise AirParifException("No pollution episode today or tomorrow")
-
+        if not data["demain"]["actif"]:
+            raise AirParifException("No pollution episode tomorrow")
         if dryrun:
             return
 
-        # TODO: retrieve episode data and toot
+        toot = TOOT_EPISODE_TEMPLATE.format(
+            message=data["message"]["fr"],
+            pollutants="\n".join(
+                [
+                    f"👉 {p['nom']}: {p['niveau']} µg/m³"
+                    for p in data["demain"]["polluants"]
+                ]
+            ),
+        )
+        self.mastodon.status_post(
+            toot,
+            visibility="unlisted",
+            language="fr",
+        )
 
 
 def airparif() -> None:
