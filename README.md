@@ -44,6 +44,25 @@ poetry run airparif today
 poetry run airparif tomorrow
 ```
 
+### Run using docker image
+
+Create local docker image:
+
+```bash
+docker build -t air_bot:$(poetry version --short) -t air_bot:latest .
+```
+
+Run local docker image:
+
+```bash
+source .env
+docker run \
+  -e MASTODON_INSTANCE=${MASTODON_INSTANCE} \
+  -e MASTODON_ACCESS_TOKEN=${MASTODON_ACCESS_TOKEN} \
+  -e AIRPARIF_API_KEY=${AIRPARIF_API_KEY} \
+  air_bot:latest airparif now
+```
+
 ## Contribute
 
 To create a bot for publishing [ATMO](https://www.atmo-france.org/) data (exemple: "service"), those steps can be followed :
