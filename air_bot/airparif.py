@@ -12,6 +12,8 @@ from air_bot import AirBot, AirParifException, logger
 
 AIRPARIF_API_BASE_URL = "https://api.airparif.asso.fr"
 AIRPARIF_WMS_BASE_URL = "https://magellan.airparif.asso.fr/geoserver/siteweb/wms"
+WMS_LAYER_TODAY = "siteweb:vue_indice_atmo_2020_com"
+WMS_LAYER_TOMORROW = "siteweb:vue_indice_atmo_2020_com_jp1"
 MIME_PNG = "image/png"
 EXIT_CODE = 666
 
@@ -94,8 +96,9 @@ class AirParifBot(AirBot):
             logger.error(r.reason)
             raise AirParifException(f"The response {r} does not have expected status")
 
-    def _generate_map_image_now(
+    def _generate_map_image(
         self,
+        wms_layer: str,
         width: int = 600,
         height: int = 500,
         path: str = f"airparif_idf_{datetime.now().strftime('%Y%m%d%H%M%S')}.png",
@@ -112,7 +115,7 @@ class AirParifBot(AirBot):
                 "service": "WMS",
                 "version": "1.1.0",
                 "request": "GetMap",
-                "layers": "siteweb:vue_indice_atmo_2020_com,Administratif:comm_idf,siteweb:idf_dept",
+                "layers": f"{wms_layer},Administratif:comm_idf,siteweb:idf_dept",
                 "styles": "siteweb:nouvel_indice_polygones,poly_trait_blanc,poly_trait_blanc_50",
                 "bbox": "530000.0,2335000.0,695000.0,2475000.0",
                 "width": width,
@@ -131,7 +134,7 @@ class AirParifBot(AirBot):
             return path, datetime.now()
 
     def _now(self, dryrun: bool) -> None:
-        img_path, dt = self._generate_map_image_now()
+        img_path, dt = self._generate_map_image(wms_layer=WMS_LAYER_TODAY)
         if dryrun:
             return
         try:
@@ -171,7 +174,9 @@ class AirParifBot(AirBot):
 
         toot = TOOT_BULLETIN_TEMPLATE.format(
             day=day,
-            date=data[day_key]["date"],
+            date=datetime.strftime(
+                datetime.strptime(data[day_key]["date"], "%Y-%m-%d"), "%d.%m.%Y"
+            ),
             message=data[day_key]["bulletin"]["fr"],
             pollutants="\n".join(
                 [
@@ -184,7 +189,7 @@ class AirParifBot(AirBot):
 
     def _today(self, dryrun: bool) -> None:
         toot = self._bulletin("aujourd'hui", "jour")
-        img_path, dt = self._generate_map_image_now()
+        img_path, _ = self._generate_map_image(wms_layer=WMS_LAYER_TODAY)
         if dryrun:
             return
         try:
@@ -194,7 +199,7 @@ class AirParifBot(AirBot):
                     self.mastodon.media_post(
                         img_path,
                         mime_type=MIME_PNG,
-                        description=f"Carte de la qualité de l'air mesurée par AirParif à {dt.strftime('%Hh%M')}",
+                        description="Carte de la qualité de l'air mesurée par AirParif aujourd'hui",
                     )
                 ],
                 visibility="unlisted",
@@ -205,13 +210,24 @@ class AirParifBot(AirBot):
 
     def _tomorrow(self, dryrun: bool) -> None:
         toot = self._bulletin("demain", "demain")
+        img_path, _ = self._generate_map_image(wms_layer=WMS_LAYER_TOMORROW)
         if dryrun:
             return
-        self.mastodon.status_post(
-            toot,
-            visibility="unlisted",
-            language="fr",
-        )
+        try:
+            self.mastodon.status_post(
+                toot,
+                media_ids=[
+                    self.mastodon.media_post(
+                        img_path,
+                        mime_type=MIME_PNG,
+                        description="Carte de la qualité de l'air mesurée par AirParif demain",
+                    )
+                ],
+                visibility="unlisted",
+                language="fr",
+            )
+        finally:
+            os.remove(img_path)
 
     def _episode(self, dryrun: bool) -> None:
         r: Response = requests.get(
