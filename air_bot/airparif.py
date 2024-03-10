@@ -84,18 +84,6 @@ class AirParifBot(AirBot):
         else:
             raise AirParifException(f"Unknown action: {arguments.action}")
 
-    def _check_http_response(self, r: Response, expected: int = 200) -> None:
-        """
-        Utilitary method that checks if an HTTP response has expected status.
-        If not, an AirParifException is raised
-        :param r: HTTP response
-        :param expected: expected status_code
-        :return: nothing but a ginseng
-        """
-        if r.status_code != expected:
-            logger.error(r.reason)
-            raise AirParifException(f"The response {r} does not have expected status")
-
     def _generate_map_image(
         self,
         wms_layer: str,
@@ -126,7 +114,7 @@ class AirParifBot(AirBot):
             },
             stream=True,
         )
-        self._check_http_response(r)
+        r.raise_for_status()
 
         with open(path, "wb") as f:
             r.raw.decode_content = True
@@ -164,7 +152,7 @@ class AirParifBot(AirBot):
             f"{AIRPARIF_API_BASE_URL}/indices/prevision/bulletin",
             headers={"X-Api-Key": self.api_key},
         )
-        self._check_http_response(r)
+        r.raise_for_status()
 
         data = r.json()
         if not data[day_key]["disponible"]:
@@ -234,7 +222,7 @@ class AirParifBot(AirBot):
             f"{AIRPARIF_API_BASE_URL}/episodes/en-cours-et-prevus",
             headers={"X-Api-Key": self.api_key},
         )
-        self._check_http_response(r)
+        r.raise_for_status()
 
         data = r.json()
         if not data["actif"]:
