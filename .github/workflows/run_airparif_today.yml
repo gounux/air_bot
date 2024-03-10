@@ -1,0 +1,45 @@
+name: "💬 Publish AirParif air quality for today (morning job)"
+
+on:
+  workflow_dispatch:
+    schedule:
+      - cron: "0 8 * * *"  # daily at 8:00
+
+permissions:
+  contents: read
+
+jobs:
+
+  run:
+    name: Lint py code
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Get source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.0.0
+        with:
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml"
+          python-version: "3.10"
+
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.5.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          virtualenvs-path: ~/.env
+          installer-parallel: true
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Check black lint
+        env:
+          MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+          AIRPARIF_API_KEY: ${{ secrets.AIRPARIF_API_KEY }}
+        run: poetry run airparif today --verbose
