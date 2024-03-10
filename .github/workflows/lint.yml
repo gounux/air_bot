@@ -40,10 +40,10 @@ jobs:
         run: poetry install
 
       - name: Check black lint
-        run: poetry run black --check --diff airbot
+        run: poetry run black --check --diff ./air_bot
 
       - name: Check isort lint
-        run: poetry run isort --check airbot
+        run: poetry run isort --check ./air_bot
 
 #      - name: Check mypy lint
-#        run: poetry run mypy --ignore-missing-imports --check airbot
+#        run: poetry run mypy --ignore-missing-imports --check ./air_bot
