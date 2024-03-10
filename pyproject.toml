@@ -13,6 +13,11 @@ requests = "^2.31.0"
 mastodon-py = "^1.8.1"
 colorlog = "^6.8.2"
 
+[tool.poetry.group.dev.dependencies]
+black = "^24.2.0"
+isort = "^5.13.2"
+mypy = "^1.9.0"
+
 [tool.poetry.scripts]
 airparif = "air_bot.airparif:airparif"
 
