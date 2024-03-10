@@ -31,8 +31,10 @@ class AirBot(ABC):
     mastodon: Mastodon
 
     def __init__(self, instance: str, access_token: str) -> None:
+        logger.debug(f"Connecting to instance '{instance}'")
         self.mastodon = Mastodon(api_base_url=instance, access_token=access_token)
         self.me = self.mastodon.me()
+        logger.debug(f"Me is '{self.me}'")
 
     def arguments(self) -> Namespace:
         """
