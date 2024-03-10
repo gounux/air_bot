@@ -1,4 +1,4 @@
-name: "💬 Publish AirParif air quality data now"
+name: "💬 Publish AirParif now"
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
 jobs:
 
   run:
-    name: Lint py code
+    name: Publish AirParif now
     runs-on: ubuntu-latest
 
     steps:
@@ -36,8 +36,9 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Check black lint
+      - name: Publish AirParif now
         env:
+          MASTODON_INSTANCE: ${{ env.MASTODON_ACCESS_TOKEN }}
           MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
           AIRPARIF_API_KEY: ${{ secrets.AIRPARIF_API_KEY }}
         run: poetry run airparif now --verbose
