@@ -40,7 +40,7 @@ jobs:
 
       - name: Publish AirParif for today
         env:
-          MASTODON_INSTANCE: ${{ env.MASTODON_ACCESS_TOKEN }}
+          MASTODON_INSTANCE: ${{ env.MASTODON_INSTANCE }}
           MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
           AIRPARIF_API_KEY: ${{ secrets.AIRPARIF_API_KEY }}
         run: poetry run airparif today --verbose
