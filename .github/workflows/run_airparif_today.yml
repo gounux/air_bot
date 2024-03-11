@@ -2,8 +2,8 @@ name: "💬 Publish AirParif for today (morning job)"
 
 on:
   workflow_dispatch:
-    schedule:
-      - cron: "0 8 * * *"  # daily at 8:00
+  schedule:
+    - cron: "0 8 * * *"  # daily at 8:00
 
 permissions:
   contents: read
