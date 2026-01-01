@@ -85,7 +85,12 @@ class AtmoSudBot(AirBot):
             status_message = f"💨 Qualité de l'air AtmoSud sur la région PACA pour aujourd'hui ({datetime.now().strftime('%Y-%m-%d')})"
 
             time.sleep(10)  # let time to upload the media.
-            self.mastodon.status_post(status=status_message, media_ids=[media])
+            self.mastodon.status_post(
+                status=status_message,
+                media_ids=[media],
+                visibility="unlisted",
+                language="fr",
+            )
             logger.info("Posted AtmoSud gif to Mastodon")
 
         finally:
