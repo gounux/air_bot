@@ -6,6 +6,8 @@ from argparse import Namespace
 import colorlog
 from mastodon import Mastodon
 
+EXIT_CODE = 666
+
 # logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -18,7 +20,7 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-class AirParifException(Exception):
+class AtmoException(Exception):
     def __init__(self, *args):
         super().__init__(*args)
 
