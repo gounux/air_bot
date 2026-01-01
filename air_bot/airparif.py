@@ -8,14 +8,13 @@ from typing import Tuple
 import requests
 from requests import Response
 
-from air_bot import AirBot, AirParifException, logger
+from air_bot import EXIT_CODE, AirBot, AtmoException, logger
 
 AIRPARIF_API_BASE_URL = "https://api.airparif.asso.fr"
 AIRPARIF_WMS_BASE_URL = "https://magellan.airparif.asso.fr/geoserver/siteweb/wms"
 WMS_LAYER_TODAY = "siteweb:vue_indice_atmo_2020_com"
 WMS_LAYER_TOMORROW = "siteweb:vue_indice_atmo_2020_com_jp1"
 MIME_PNG = "image/png"
-EXIT_CODE = 666
 
 TOOT_BULLETIN_TEMPLATE = """💨 Bulletin #AirParif {day} ({date}) :
 
@@ -82,7 +81,7 @@ class AirParifBot(AirBot):
         elif arguments.action == "episode":
             self._episode(dryrun)
         else:
-            raise AirParifException(f"Unknown action: {arguments.action}")
+            raise AtmoException(f"Unknown action: {arguments.action}")
 
     def _generate_map_image(
         self,
@@ -156,7 +155,7 @@ class AirParifBot(AirBot):
 
         data = r.json()
         if not data[day_key]["disponible"]:
-            raise AirParifException(
+            raise AtmoException(
                 f"Bulletin ({day} is not available. Please come back later"
             )
 
@@ -226,9 +225,9 @@ class AirParifBot(AirBot):
 
         data = r.json()
         if not data["actif"]:
-            raise AirParifException("No pollution episode today or tomorrow")
+            raise AtmoException("No pollution episode today or tomorrow")
         if not data["demain"]["actif"]:
-            raise AirParifException("No pollution episode tomorrow")
+            raise AtmoException("No pollution episode tomorrow")
         if dryrun:
             return
 
